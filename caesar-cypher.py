@@ -1,66 +1,84 @@
-import sys
+import os
 
-# Sleek layout header 
-def print_banner():
-    print("-" * 60)
-    print(" ██████╗ █████╗ ███████╗███████╗ █████╗ ██████╗      ██████╗██╗██████╗ ██╗  ██╗███████╗██████╗ ")
-    print("██╔════╝██╔══██╗██╔════╝██╔════╝██╔══██╗██╔══██╗    ██╔════╝██║██╔══██╗██║  ██║██╔════╝██╔══██╗")
-    print("██║     ███████║█████╗  ███████╗███████║██████╔╝    ██║     ██║██████╔╝███████║█████╗  ██████╔╝")
-    print("██║     ██╔══██║██╔══╝  ╚════██║██╔══██║██╔══██╗    ██║     ██║██╔═══╝ ██╔══██║██╔══╝  ██╔══██╗")
-    print("╚██████╗██║  ██║███████╗███████║██║  ██║██║  ██║    ╚██████╗██║██║     ██║  ██║███████╗██║  ██║")
-    print(" ╚═════╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝     ╚═════╝╚═╝╚═╝     ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝")
-    print("-" * 60)
-    print("             PRODIGY INFOTECH CYBERSECURITY INTERNSHIP - TASK 01")
-    print("-" * 60)
-
-def caesar_cipher(text, shift, mode):
+def caesar_cipher(text, shift, mode='encrypt'):
     result = ""
-    # Adjust shift for decryption
-    if mode == 'd':
+    if mode == 'decrypt':
         shift = -shift
-        
     for char in text:
-        if char.isalpha():
-            start = ord('A') if char.isupper() else ord('a')
-            # Handle alphabetical wrapping
-            result += chr((ord(char) - start + shift) % 26 + start)
+        if char.isupper():
+            result += chr((ord(char) + shift - 65) % 26 + 65)
+        elif char.islower():
+            result += chr((ord(char) + shift - 97) % 26 + 97)
         else:
             result += char
     return result
 
+def display_banner():
+    print("-" * 60)
+    print("""
+ ██████╗ █████╗ ███████╗███████╗ █████╗ ██████╗ 
+██╔════╝██╔══██╗██╔════╝██╔════╝██╔══██╗██╔══██╗
+██║     ███████║█████╗  ███████╗███████║██████╔╝
+██║     ██╔══██║██╔══╝  ╚════██║██╔══██║██╔══██╗
+╚██████╗██║  ██║███████╗███████║██║  ██║██║  ██║
+ ╚═════╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝
+    """)
+    print("           DEVELOPER: MOHAMMED SHEZIL")
+    print("-" * 60)
+
+def get_valid_filename(prompt):
+    fname = input(prompt).strip()
+    if not fname.endswith(".txt"):
+        fname += ".txt"
+    return fname
+
 def main():
-    print_banner()
     while True:
-        print("\n[1] Encrypt a Message")
-        print("[2] Decrypt a Message")
-        print("[3] Exit program")
+        display_banner()
+        print("1. Encrypt Message & Save to Custom File")
+        print("2. Decrypt Message from Custom File")
+        print("3. Exit")
         
-        choice = input("\nSelect an option (1/2/3): ").strip()
+        choice = input("\nSelect an option (1-3): ")
         
         if choice == '1':
-            message = input("\nEnter the secret message to encrypt: ")
+            msg = input("\nEnter the message to encrypt: ")
             try:
-                shift = int(input("Enter key shift value (integer): "))
-                encrypted = caesar_cipher(message, shift, 'e')
-                print(f"\n[+] Encrypted Result: {encrypted}")
+                shift = int(input("Enter shift value (number): "))
+                encrypted_msg = caesar_cipher(msg, shift, 'encrypt')
+                filename = get_valid_filename("Enter the name for your new file: ")
+                
+                with open(filename, "w") as f:
+                    f.write(encrypted_msg)
+                    
+                print(f"\n[✔] Success! Message saved to: {filename}")
+                print(f"Encrypted Content: {encrypted_msg}")
             except ValueError:
-                print("\n[-] Error: Shift value must be a valid number!")
+                print("\n[!] Error: Shift value must be an integer.")
                 
         elif choice == '2':
-            message = input("\nEnter the encrypted message to decrypt: ")
-            try:
-                shift = int(input("Enter matching shift value (integer): "))
-                decrypted = caesar_cipher(message, shift, 'd')
-                print(f"\n[+] Decrypted Result: {decrypted}")
-            except ValueError:
-                print("\n[-] Error: Shift value must be a valid number!")
+            filename = get_valid_filename("Enter the filename to decrypt (e.g., secret_data): ")
+            if os.path.exists(filename):
+                with open(filename, "r") as f:
+                    encrypted_content = f.read()
+                print(f"\nFile Content Found: {encrypted_content}")
+                try:
+                    shift = int(input("Enter the shift value used for encryption: "))
+                    decrypted_msg = caesar_cipher(encrypted_content, shift, 'decrypt')
+                    print(f"\n[✔] Decrypted Message: {decrypted_msg}")
+                except ValueError:
+                    print("\n[!] Error: Shift value must be an integer.")
+            else:
+                print(f"\n[!] Error: The file '{filename}' was not found.")
                 
         elif choice == '3':
-            print("\nExiting. Stay secure!")
-            sys.exit()
+            print("\nExiting... Great work today, Shezil!")
+            break
         else:
-            print("\n[-] Invalid option! Please select 1, 2, or 3.")
-            print("-" * 40)
+            print("\n[!] Invalid choice. Please try again.")
+            
+        input("\nPress Enter to return to menu...")
+        os.system('cls' if os.name == 'nt' else 'clear')
 
 if __name__ == "__main__":
     main()
